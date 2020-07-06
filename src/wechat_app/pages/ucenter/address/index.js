@@ -16,10 +16,11 @@ Page({
     },
     getAddresses() {
         let that = this;
-        util.request(api.GetAddresses).then(function(res) {
-            if (res.errno === 0) {
+        let userInfo = wx.getStorageSync('userInfo');
+        util.request(api.GetAddresses, {userId:userInfo.id}, "POST").then(function(res) {
+            if (res.data.header.code === 0) {
                 that.setData({
-                    addresses: res.data
+                    addresses: res.data.body.data
                 })
             }
         });

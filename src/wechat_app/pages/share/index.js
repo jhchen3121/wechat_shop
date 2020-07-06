@@ -15,8 +15,9 @@ Page({
         util.request(api.GetBase64, {
             goodsId: id
         }, 'POST').then(function(res) {
-            if (res.errno === 0) {
-                that.getQrcodeJpg(res.data);
+            if (res.data.header.code === 0) {
+                //that.getQrcodeJpg(res.data);
+                that.getGoodsInfo(res.data.body.qrcode_url);
             }
         });
     },

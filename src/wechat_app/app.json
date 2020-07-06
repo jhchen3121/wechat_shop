@@ -1,7 +1,7 @@
 {
     "pages": [
-        "pages/index/index",
         "pages/app-auth/index",
+        "pages/index/index",  
         "pages/category/index",
         "pages/cart/cart",
         "pages/share/index",

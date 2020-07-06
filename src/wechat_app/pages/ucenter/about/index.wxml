@@ -1,15 +1,15 @@
 <view class="container">
     <view class='about-wrap'>
-        <view class='title'>海风小店</view>
+        <view class='title'>陈天宝金店</view>
         <view class='content'>
             开源微信小程序商城
         </view>
         <view class="line"></view>
-        <view class="content">开发者：盛良</view>
-        <view class="content">微信：lookgxl</view>
+        <view class="content">开发者：jhchen</view>
+        <view class="content">微信：cjh_3121</view>
         <view class="line"></view>
         <view class='content'>
-            更多信息访问：hiolabs.com
+            更多信息访问：www.jhchen3121.com
         </view>
     </view>
 </view>

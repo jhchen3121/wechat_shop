@@ -43,9 +43,10 @@ Page({
     },
     getOrderInfo: function(e) {
         let that = this;
-        util.request(api.OrderCountInfo).then(function(res) {
-            if (res.errno === 0) {
-                let status = res.data;
+        let userInfo = wx.getStorageSync('userInfo');
+        util.request(api.OrderCountInfo,{userid:userInfo.id},'POST').then(function(res) {
+            if (res.data.header.code === 0) {
+                let status = res.data.body.data;
                 that.setData({
                     status: status
                 });
@@ -54,20 +55,22 @@ Page({
     },
     getOrderList() {
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         util.request(api.OrderList, {
             showType: that.data.showType,
             size: that.data.size,
             page: that.data.allPage,
-        }).then(function(res) {
-            if (res.errno === 0) {
-                let count = res.data.count;
+            userId: userInfo.id,
+        },'POST').then(function(res) {
+            if (res.data.header.code === 0) {
+                let count = res.data.body.data.count;
                 that.setData({
                     allCount: count,
-                    allOrderList: that.data.allOrderList.concat(res.data.data),
-                    allPage: res.data.currentPage,
-                    orderList: that.data.allOrderList.concat(res.data.data)
+                    allOrderList: that.data.allOrderList.concat(res.data.body.data.data),
+                    allPage: res.data.body.data.currentPage,
+                    orderList: that.data.allOrderList.concat(res.data.body.data.data)
                 });
-                let hasOrderData = that.data.allOrderList.concat(res.data.data);
+                let hasOrderData = that.data.allOrderList.concat(res.data.body.data.data);
                 if (count == 0) {
                     that.setData({
                         hasOrder: 1
@@ -118,15 +121,17 @@ Page({
     cancelOrder: function(e) {
         let that = this;
         let orderId = e.currentTarget.dataset.index;
+        let userInfo = wx.getStorageSync('userInfo');
         wx.showModal({
             title: '',
             content: '确定要取消此订单？',
             success: function(res) {
                 if (res.confirm) {
                     util.request(api.OrderCancel, {
-                        orderId: orderId
+                        orderId: orderId,
+                        userId: userInfo.id
                     }, 'POST').then(function(res) {
-                        if (res.errno === 0) {
+                        if (res.data.header.code === 0) {
                             wx.showToast({
                                 title: '取消订单成功'
                             });
@@ -139,7 +144,7 @@ Page({
                             });
                             that.getOrderList();
                         } else {
-                            util.showErrorToast(res.errmsg);
+                            util.showErrorToast(res.data.header.msg);
                         }
                     });
                 }

@@ -94,11 +94,13 @@ Page({
     },
     getGoodsInfo: function() {
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         util.request(api.GoodsDetail, {
-            id: that.data.id
-        }).then(function(res) {
-            if (res.errno === 0) {
-                let _specificationList = res.data.specificationList;
+            goodsId: that.data.id,
+            userId: userInfo.id
+        }, 'POST').then(function(res) {
+            if (res.data.header.code === 0) {
+                let _specificationList = res.data.body.data.specificationList;
                 // 如果仅仅存在一种货品，那么商品页面初始化时默认checked
                 if (_specificationList.valueList.length == 1) {
                     _specificationList.valueList[0].checked = true
@@ -112,24 +114,24 @@ Page({
                     });
                 }
                 let galleryImages = [];
-                for (const item of res.data.gallery) {
+                for (const item of res.data.body.data.gallery) {
                     galleryImages.push(item.img_url);
                 }
                 that.setData({
-                    goods: res.data.info,
-                    goodsNumber: res.data.info.goods_number,
-                    gallery: res.data.gallery,
-                    specificationList: res.data.specificationList,
-                    productList: res.data.productList,
-                    checkedSpecPrice: res.data.info.retail_price,
+                    goods: res.data.body.data.info,
+                    goodsNumber: res.data.body.data.info.goods_number,
+                    gallery: res.data.body.data.gallery,
+                    specificationList: res.data.body.data.specificationList,
+                    productList: res.data.body.data.productList,
+                    checkedSpecPrice: res.data.body.data.info.retail_price,
                     galleryImages: galleryImages,
                     loading:1
                 });
-                WxParse.wxParse('goodsDetail', 'html', res.data.info.goods_desc, that);
-                wx.setStorageSync('goodsImage', res.data.info.https_pic_url);
+                WxParse.wxParse('goodsDetail', 'html', res.data.body.data.info.goods_desc, that);
+                wx.setStorageSync('goodsImage', res.data.body.data.info.https_pic_url);
             }
             else{
-                util.showErrorToast(res.errmsg)
+                util.showErrorToast(res.data.header.msg)
             }
         });
     },
@@ -294,6 +296,8 @@ Page({
         });
     },
     onLoad: function(options) {
+        // 页面初始化先进行一次判断,若是通过分享进入的页面用户未授权应该跳到授权页面
+        util.loginNow();
         let id = 0;
         var scene = decodeURIComponent(options.scene);
         if (scene != 'undefined') {
@@ -331,10 +335,11 @@ Page({
     },
     getCartCount: function() {
         let that = this;
-        util.request(api.CartGoodsCount).then(function(res) {
-            if (res.errno === 0) {
+        let info = wx.getStorageSync('userInfo');
+        util.request(api.CartGoodsCount, {userid:info.id}, 'POST').then(function(res) {
+            if (res.data.header.code === 0) {
                 that.setData({
-                    cartGoodsCount: res.data.cartTotal.goodsCount
+                    cartGoodsCount: es.data.body.cartTotal.goodsCount
                 });
             }
         });
@@ -375,8 +380,8 @@ Page({
         });
     },
     addToCart: function() {
-        // 判断是否登录，如果没有登录，则登录
-        util.loginNow();
+        // 判断是否登录，如果没有登录，则登录 页面初始化时候就做判断
+        // util.loginNow();
         var that = this;
         let userInfo = wx.getStorageSync('userInfo');
         let productLength = this.data.productList.length;
@@ -422,15 +427,17 @@ Page({
                 });
                 return false;
             }
+            // TODO 加入购物车未实现
             util.request(api.CartAdd, {
                     addType: 0,
+                    userId: userInfo.id,
                     goodsId: this.data.id,
                     number: this.data.number,
                     productId: checkedProduct.id
                 }, "POST")
                 .then(function(res) {
                     let _res = res;
-                    if (_res.errno == 0) {
+                    if (_res.data.header.code == 0) {
                         wx.showToast({
                             title: '添加成功',
                         });
@@ -456,7 +463,7 @@ Page({
     },
     fastToCart: function() {
         // 判断是否登录，如果没有登录，则登录
-        util.loginNow();
+        //util.loginNow();
         let userInfo = wx.getStorageSync('userInfo');
         if (userInfo == '') {
             return false;
@@ -499,16 +506,17 @@ Page({
                 });
                 return false;
             }
-            //添加到购物车
+            //TODO 添加到购物车
             util.request(api.CartAdd, {
                     addType: 1, // 0：正常加入购物车，1:立即购买，2:再来一单
+                    userId: userInfo.id,
                     goodsId: this.data.id,
                     number: this.data.number,
                     productId: checkedProduct.id,
                 }, "POST")
                 .then(function(res) {
                     let _res = res;
-                    if (_res.errno == 0) {
+                    if (_res.data.header.code == 0) {
                         let id = that.data.id;
                         wx.navigateTo({
                             url: '/pages/order-check/index?addtype=1'
@@ -516,7 +524,7 @@ Page({
                     } else {
                         wx.showToast({
                             image: '/images/icon/icon_error.png',
-                            title: _res.errmsg,
+                            title: _res.data.header.msg,
                         });
                     }
                 });

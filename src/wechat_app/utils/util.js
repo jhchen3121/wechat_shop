@@ -74,14 +74,13 @@ function request(url, data = {}, method = "GET") {
             method: method,
             header: {
                 'Content-Type': 'application/json',
-                'X-Nideshop-Token': wx.getStorageSync('token')
+                'x-session-token': wx.getStorageSync('token')
             },
             success: function(res) {
                 if (res.statusCode == 200) {
-
-                    if (res.data.errno == 401) {
+                    if (res.data.header.code == -4003) {
+                        showErrorToast("会话失效，需要重新登陆");
                         //需要登录后才可以操作
-
                         let code = null;
                         return login().then((res) => {
                             code = res.code;
@@ -92,12 +91,13 @@ function request(url, data = {}, method = "GET") {
                                 code: code,
                                 userInfo: userInfo
                             }, 'POST').then(res => {
-                                if (res.errno === 0) {
+                                if (res.data.header.code === 0) {
                                     //存储用户信息
-                                    wx.setStorageSync('userInfo', res.data.userInfo);
-                                    wx.setStorageSync('token', res.data.token);
+                                    wx.setStorageSync('userInfo', res.data.body.data.userInfo);
+                                    wx.setStorageSync('token', res.data.body.data.token);
                                     resolve(res);
                                 } else {
+                                    showErrorToast(res.data.header.msg);
                                     reject(res);
                                 }
                             }).catch((err) => {
@@ -106,8 +106,11 @@ function request(url, data = {}, method = "GET") {
                         }).catch((err) => {
                             reject(err);
                         })
-                    } else {
-                        resolve(res.data);
+                    } else if(res.data.header.code === 0){
+                        resolve(res);
+                    }else{
+                        showErrorToast(res.data.header.msg);
+                        reject(res.header.msg);
                     }
                 } else {
                     reject(res.errMsg);

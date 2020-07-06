@@ -18,10 +18,10 @@ function loginByWeixin() {
                 code: code,
                 userInfo: userInfo
             }, 'POST').then(res => {
-                if (res.errno === 0) {
+                if (res.data.header.code === 0) {
                     //存储用户信息
-                    wx.setStorageSync('userInfo', res.data.userInfo);
-                    wx.setStorageSync('token', res.data.token);
+                    wx.setStorageSync('userInfo', res.data.body.data.userInfo);
+                    wx.setStorageSync('token', res.data.body.data.token);
                     resolve(res);
                 } else {
                     reject(res);

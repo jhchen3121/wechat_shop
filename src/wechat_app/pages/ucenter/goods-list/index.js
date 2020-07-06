@@ -12,12 +12,14 @@ Page({
     },
     getGoodsList: function(id) {
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         util.request(api.OrderGoods, {
-            orderId: id
-        }).then(function(res) {
-            if (res.errno === 0) {
+            orderId: id,
+            userId: userInfo.id
+        },'POST').then(function(res) {
+            if (res.data.header.code === 0) {
                 that.setData({
-                    goodsList: res.data
+                    goodsList: res.data.body.data
                 });
             }
         });

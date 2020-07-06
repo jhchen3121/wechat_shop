@@ -1,14 +1,16 @@
+<wxs src="../../wxs/tools.wxs" module="tools"/>
 <view class="container" wx:if="{{loading == 1}}">
     <view class='contact-wrap'>
-        <button class="contact-btn" session-from='{"nickName":"{{userInfo.nickname}}","avatarUrl":"{{userInfo.avatar}}"}' open-type="contact">
+        <!--<button class="contact-btn" session-from='{"nickName":"{{userInfo.nickname}}","avatarUrl":"{{userInfo.avatar}}"}' open-type="contact">
             <image class='icon' src='/images/icon/contact.png'></image>
             <view class='text'>客服</view>
-        </button>
+        </button>-->
     </view>
     <view class="search" bindtap="goSearch">
         <image class="icon" src="/images/icon/search.png"></image>
         <text class="txt">搜索, 共{{goodsCount}}款好物</text>
     </view>
+    <!--首页大滑动页面-->
     <view class='banner-wrap' wx:if="{{show_banner && banner.length > 0}}">
         <swiper class="banner" indicator-dots="true" autoplay="{{autoplay}}" interval="3000" duration="1000"   >
             <swiper-item wx:for="{{banner}}" wx:key="id">
@@ -21,6 +23,7 @@
             </swiper-item>
         </swiper>
     </view>
+    <!--公告栏-->
     <view class='marquee_box' wx:if="{{notice.length>0 && show_notice == 1}}">
         <swiper vertical="{{true}}" class="notice-swiper" indicator-dots="{{false}}" autoplay="{{autoplay}}" interval="2000" duration="1000">
             <swiper-item wx:for="{{notice}}" wx:key="id" class='notice-wrap'>
@@ -35,6 +38,7 @@
         </swiper>
     </view>
     <swiper class="catalog-wrap" indicator-dots="{{false}}" indicator-color="#dedede" indicator-active-color="#e00000" wx:if="{{show_channel}}">
+    <!--分类icon-->
         <swiper-item class="first">
             <view wx:for="{{channel}}" wx:if="{{item.sort_order < 7}}" wx:key="id" class='icon-navi' data-cateid="{{item.id}}" bindtap="goCategory">
                 <image class='icon-img' src="{{item.icon_url}}"></image>
@@ -99,5 +103,5 @@
 </view>
 <view class="loading" style="height:{{sysHeight}}px" wx:else>
     <image class="img" src="/images/icon/loading.gif"></image>
-    <view class="text">海风吹啊吹</view>
+    <view class="text">加载中..</view>
 </view>
