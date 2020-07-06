@@ -1,0 +1,5 @@
+var strJoin = function(val1, val2) {
+  //字符串拼接，只考虑2字符串，代码需修改
+  return val1 + val2;
+}
+module.exports.strJoin = strJoin;
