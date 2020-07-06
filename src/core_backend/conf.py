@@ -1,0 +1,5 @@
+EXCHANGE = 'wep.service.topic'
+EXCHANGE_TYPE = 'topic'
+QUEUE = 'wep.service.queue'
+ROUTING_KEY = 'wep.service.#'
+ROUTING_PREFIX = 'wep.service.'

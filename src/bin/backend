@@ -1,0 +1,49 @@
+#!/bin/bash
+#用于web的异步任务
+
+if ! type -p celery >/dev/null;then 
+    cd `dirname $0`
+    cd ..
+    source ./env.sh
+fi
+
+cd ${PROJ_DIR}
+
+PROG_NAME=backend
+
+start() {
+    supervisorctl start ${PROG_NAME}
+}
+
+stop() {
+    supervisorctl stop ${PROG_NAME}
+}
+
+show_status() {
+    supervisorctl status ${PROG_NAME}
+}
+
+restart() {
+    show_status
+    supervisorctl restart ${PROG_NAME}
+    show_status
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+        
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    status)
+        show_status
+        ;;
+    *)
+        echo "$0 [start] [stop] [restart] [status]"
+        ;;
+esac

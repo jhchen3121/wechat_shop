@@ -1,0 +1,4 @@
+src/.env/
+src/hioshop-server/
+src/web/node_modules/
+*.pyc
