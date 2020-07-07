@@ -14,16 +14,20 @@
 		"checkInvalidKey": true,
 		"checkSiteMap": false,
 		"uploadWithSourceMap": true,
+		"compileHotReLoad": false,
 		"babelSetting": {
 			"ignore": [],
 			"disablePlugins": [],
 			"outputPath": ""
-		}
+		},
+		"useIsolateContext": true,
+		"useCompilerModule": false,
+		"userConfirmedUseCompilerModuleSwitch": false
 	},
 	"compileType": "miniprogram",
 	"libVersion": "2.9.4",
-	"appid": "wxf3d768d1818218f1",
-	"projectname": "%e6%b5%b7%e9%a3%8e%e5%b0%8f%e5%ba%97",
+	"appid": "wxdfce9fe6561c4b95",
+	"projectname": "%E9%99%88%E5%A4%A9%E5%AE%9D%E9%87%91%E5%BA%97",
 	"isGameTourist": false,
 	"scripts": {
 		"beforeCompile": "",

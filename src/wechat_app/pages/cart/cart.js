@@ -51,20 +51,21 @@ Page({
     },
     getCartList: function() {
         let that = this;
-        util.request(api.CartList).then(function(res) {
-            if (res.errno === 0) {
-                let hasCartGoods = res.data.cartList;
+        let userInfo = wx.getStorageSync('userInfo');
+        util.request(api.CartList, {userId: userInfo.id}, 'POST').then(function(res) {
+            if (res.data.header.code === 0) {
+                let hasCartGoods = res.data.body.data.cartList;
                 if (hasCartGoods.length != 0) {
                     hasCartGoods = 1;
                 } else {
                     hasCartGoods = 0;
                 }
                 that.setData({
-                    cartGoods: res.data.cartList,
-                    cartTotal: res.data.cartTotal,
+                    cartGoods: res.data.body.data.cartList,
+                    cartTotal: res.data.body.data.cartTotal,
                     hasCartGoods: hasCartGoods
                 });
-                if (res.data.cartTotal.numberChange == 1) {
+                if (res.data.body.data.cartTotal.numberChange == 1) {
                     util.showErrorToast('部分商品库存有变动');
                 }
             }
@@ -100,18 +101,20 @@ Page({
     },
     checkedAll: function() {
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         if (!this.data.isEditCart) {
             var productIds = this.data.cartGoods.map(function(v) {
                 return v.product_id;
             });
             util.request(api.CartChecked, {
+                userId: userInfo.id,
                 productIds: productIds.join(','),
                 isChecked: that.isCheckedAll() ? 0 : 1
             }, 'POST').then(function(res) {
-                if (res.errno === 0) {
+                if (res.data.header.code === 0) {
                     that.setData({
-                        cartGoods: res.data.cartList,
-                        cartTotal: res.data.cartTotal
+                        cartGoods: res.data.body.data.cartList,
+                        cartTotal: res.data.body.data.cartTotal
                     });
                 }
 
@@ -136,19 +139,21 @@ Page({
     },
     updateCart: function(itemIndex, productId, number, id) {
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         wx.showLoading({
             title: '',
             mask:true
           })
         util.request(api.CartUpdate, {
+            userId: userInfo.id,
             productId: productId,
             number: number,
             id: id
         }, 'POST').then(function(res) {
-            if (res.errno === 0) {
+            if (res.data.header.code === 0) {
                 that.setData({
-                    cartGoods: res.data.cartList,
-                    cartTotal: res.data.cartTotal
+                    cartGoods: res.data.body.data.cartList,
+                    cartTotal: res.data.body.data.cartTotal
                 });
                 let cartItem = that.data.cartGoods[itemIndex];
                 cartItem.number = number;
@@ -186,15 +191,16 @@ Page({
         this.updateCart(itemIndex, cartItem.product_id, number, cartItem.id);
     },
     getCartNum: function() {
-        util.request(api.CartGoodsCount).then(function(res) {
-            if (res.errno === 0) {
+        let userInfo = wx.getStorageSync('userInfo');
+        util.request(api.CartGoodsCount, {userid: userInfo.id}, 'POST').then(function(res) {
+            if (res.data.header.code === 0) {
                 let cartGoodsCount = '';
-                if (res.data.cartTotal.goodsCount == 0) {
+                if (res.data.body.cartTotal.goodsCount == 0) {
                     wx.removeTabBarBadge({
                         index: 2,
                     })
                 } else {
-                    cartGoodsCount = res.data.cartTotal.goodsCount + '';
+                    cartGoodsCount = res.data.body.cartTotal.goodsCount + '';
                     wx.setTabBarBadge({
                         index: 2,
                         text: cartGoodsCount
@@ -234,16 +240,18 @@ Page({
     checkedItem: function(e) {
         let itemIndex = e.currentTarget.dataset.itemIndex;
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
 
         if (!this.data.isEditCart) {
             util.request(api.CartChecked, {
+                userId: userInfo.id,
                 productIds: that.data.cartGoods[itemIndex].product_id,
                 isChecked: that.data.cartGoods[itemIndex].checked ? 0 : 1
             }, 'POST').then(function(res) {
-                if (res.errno === 0) {
+                if (res.data.header.code === 0) {
                     that.setData({
-                        cartGoods: res.data.cartList,
-                        cartTotal: res.data.cartTotal
+                        cartGoods: res.data.body.data.cartList,
+                        cartTotal: res.data.body.data.cartTotal
                     });
                 }
 
@@ -331,15 +339,17 @@ Page({
         //获取已选择的商品
         let itemIndex = e.currentTarget.dataset.itemIndex;
         let productIds = this.data.cartGoods[itemIndex].product_id;
+        let userInfo = wx.getStorageSync('userInfo');
         let that = this;
         util.request(api.CartDelete, {
+            userId: userInfo.id,
             productIds: productIds
         }, 'POST').then(function(res) {
-            if (res.errno === 0) {
-                let cartList = res.data.cartList;
+            if (res.data.header.code === 0) {
+                let cartList = res.data.body.data.cartList;
                 that.setData({
                     cartGoods: cartList,
-                    cartTotal: res.data.cartTotal
+                    cartTotal: res.data.body.data.cartTotal
                 });
                 that.getCartList();
                 that.getCartNum();

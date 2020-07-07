@@ -34,13 +34,16 @@ Page({
     },
     getSettingsDetail() {
         let that = this;
-        util.request(api.SettingsDetail).then(function(res) {
-            if (res.errno === 0) {
+        let userInfo = wx.getStorageSync('userInfo');
+        util.request(api.SettingsDetail, {
+            userId: userInfo.id
+            },'POST').then(function(res) {
+            if (res.data.header.code === 0) {
                 that.setData({
-                    name: res.data.name,
-                    mobile: res.data.mobile,
+                    name: res.data.body.data.name,
+                    mobile: res.data.body.data.mobile,
                 });
-                if (res.data.name == '' || res.data.mobile == ''){
+                if (res.data.body.data.name == '' || res.data.body.data.mobile == ''){
                     util.showErrorToast('请填写姓名和手机');
                 }
             }
@@ -53,6 +56,7 @@ Page({
         let name = this.data.name;
         let mobile = this.data.mobile;
         let status = this.data.status;
+        let userInfo = wx.getStorageSync('userInfo');
         if (name == '') {
             util.showErrorToast('请输入姓名');
             return false;
@@ -65,10 +69,13 @@ Page({
         util.request(api.SaveSettings, {
             name: name,
             mobile: mobile,
+            userId: userInfo.id,
         }, 'POST').then(function(res) {
-            if (res.errno === 0) {
-                util.showErrorToast('保存成功');
+            if (res.data.header.code === 0) {
+                util.showSuccessToast('保存成功');
                 wx.navigateBack()
+            } else {
+                util.showErrorToast(res.data.header.msg);
             }
         });
     },

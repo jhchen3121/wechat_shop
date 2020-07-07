@@ -15,11 +15,16 @@ Page({
     },
     getFootprintList() {
         let that = this;
-        util.request(api.FootprintList, { page: that.data.allPage, size: that.data.size }).then(function (res) {
-            if (res.errno === 0) {
-                let count = res.data.count;
+        let userInfo = wx.getStorageSync('userInfo');
+        util.request(api.FootprintList, { 
+            page: that.data.allPage, 
+            size: that.data.size,
+            userId: userInfo.id
+        },'POST').then(function (res) {
+            if (res.data.header.code === 0) {
+                let count = res.data.body.data.count;
                 let f1 = that.data.footprintList;
-                let f2 = res.data.data;
+                let f2 = res.data.body.data.data;
                 for (let i = 0; i < f2.length; i++) {
                     let last = f1.length - 1;
                     if (last >= 0 && f1[last][0].add_time == f2[i].add_time) {
@@ -34,8 +39,8 @@ Page({
 
                 that.setData({
                     allCount: count,
-                    allFootprintList: that.data.allFootprintList.concat(res.data.data),
-                    allPage: res.data.currentPage,
+                    allFootprintList: that.data.allFootprintList.concat(res.data.body.data.data),
+                    allPage: res.data.body.data.currentPage,
                     footprintList: f1,
                 });
                 if (count == 0) {
@@ -54,8 +59,12 @@ Page({
     deletePrint: function (e) {
         let that = this;
         let id = e.currentTarget.dataset.val;
-        util.request(api.FootprintDelete, { footprintId: id }, 'POST').then(function (res) {
-            if (res.errno === 0) {
+        let userInfo = wx.getStorageSync('userInfo');
+        util.request(api.FootprintDelete, { 
+            footprintId: id,
+            userId: userInfo.id 
+        }, 'POST').then(function (res) {
+            if (res.data.header.code === 0) {
                 wx.showToast({
                     title: '取消成功',
                     icon: 'success',

@@ -86,9 +86,10 @@ Page({
     },
     getOrderInfo: function(e) {
         let that = this;
-        util.request(api.OrderCountInfo).then(function(res) {
-            if (res.errno === 0) {
-                let status = res.data;
+        let info = wx.getStorageSync('userInfo');
+        util.request(api.OrderCountInfo, {userid: info.id}, 'POST').then(function(res) {
+            if (res.data.header.code === 0) {
+                let status = res.data.body.data;
                 that.setData({
                     status: status
                 });

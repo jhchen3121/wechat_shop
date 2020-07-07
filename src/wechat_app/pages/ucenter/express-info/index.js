@@ -14,10 +14,10 @@ Page({
     },
     getExpressList(orderId) {
         let that = this;
-        util.request(api.OrderExpressInfo, {orderId: orderId}).then(function (res) {
-            if (res.errno === 0) {
-                let expressList = res.data;
-                let traces = JSON.parse(res.data.traces);
+        util.request(api.OrderExpressInfo, {orderId: orderId}, 'POST').then(function (res) {
+            if (res.data.header.code === 0) {
+                let expressList = res.data.body.data;
+                let traces = JSON.parse(res.data.body.data.traces);
                 expressList.traces = traces;
                 that.setData({
                     expressList: expressList

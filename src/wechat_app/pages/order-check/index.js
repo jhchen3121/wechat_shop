@@ -111,6 +111,7 @@ Page({
     },
     getCheckoutInfo: function () {
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         let addressId = that.data.addressId;
         let orderFrom = that.data.orderFrom;
         let addType = that.data.addType;
@@ -118,31 +119,34 @@ Page({
             addressId: addressId,
             addType: addType,
             orderFrom: orderFrom,
-            type: 0
-        }).then(function (res) {
-            if (res.errno === 0) {
+            ttype: 0,
+            userId: userInfo.id
+        }, 'POST').then(function (res) {
+            if (res.data.header.code === 0) {
                 let addressId = 0;
-                if (res.data.checkedAddress != 0) {
-                    addressId = res.data.checkedAddress.id;
+                if (res.data.body.data.checkedAddress != 0) {
+                    addressId = res.data.body.data.checkedAddress.id;
                 }
                 that.setData({
-                    checkedGoodsList: res.data.checkedGoodsList,
-                    checkedAddress: res.data.checkedAddress,
-                    actualPrice: res.data.actualPrice,
+                    checkedGoodsList: res.data.body.data.checkedGoodsList,
+                    checkedAddress: res.data.body.data.checkedAddress,
+                    actualPrice: res.data.body.data.actualPrice,
                     addressId: addressId,
-                    freightPrice: res.data.freightPrice,
-                    goodsTotalPrice: res.data.goodsTotalPrice,
-                    orderTotalPrice: res.data.orderTotalPrice,
-                    goodsCount: res.data.goodsCount,
-                    outStock: res.data.outStock
+                    freightPrice: res.data.body.data.freightPrice,
+                    goodsTotalPrice: res.data.body.data.goodsTotalPrice,
+                    orderTotalPrice: res.data.body.data.orderTotalPrice,
+                    goodsCount: res.data.body.data.goodsCount,
+                    outStock: res.data.body.data.outStock
                 });
-                let goods = res.data.checkedGoodsList;
+                let goods = res.data.body.data.checkedGoodsList;
                 wx.setStorageSync('addressId', addressId);
-                if (res.data.outStock == 1) {
+                if (res.data.body.data.outStock == 1) {
                     util.showErrorToast('有部分商品缺货或已下架');
-                } else if (res.data.numberChange == 1) {
+                } else if (res.data.body.data.numberChange == 1) {
                     util.showErrorToast('部分商品库存有变动');
                 }
+            } else {
+                util.showErrorToast(res.data.header.msg);
             }
         });
     },
@@ -156,21 +160,23 @@ Page({
         let postscript = this.data.postscript;
         let freightPrice = this.data.freightPrice;
         let actualPrice = this.data.actualPrice;
+        let userInfo = wx.getStorageSync('userInfo');
         wx.showLoading({
             title: '',
             mask:true
         })
         util.request(api.OrderSubmit, {
+            userId: userInfo.id,
             addressId: addressId,
             postscript: postscript,
             freightPrice: freightPrice,
             actualPrice: actualPrice,
             offlinePay: 0
         }, 'POST').then(res => {
-            if (res.errno === 0) {
+            if (res.data.header.code === 0) {
                 wx.removeStorageSync('orderId');
                 wx.setStorageSync('addressId', 0);
-                const orderId = res.data.orderInfo.id;
+                const orderId = res.data.body.orderInfo.id;
                 pay.payOrder(parseInt(orderId)).then(res => {
                     wx.redirectTo({
                         url: '/pages/payResult/payResult?status=1&orderId=' + orderId
@@ -181,7 +187,7 @@ Page({
                     });
                 });
             } else {
-                util.showErrorToast(res.errmsg);
+                util.showErrorToast(res.data.header.msg);
             }
             wx.hideLoading()
         });
@@ -195,21 +201,23 @@ Page({
         let postscript = this.data.postscript;
         let freightPrice = this.data.freightPrice;
         let actualPrice = this.data.actualPrice;
+        let userInfo = wx.getStorageSync('userInfo');
         util.request(api.OrderSubmit, {
+            userId: userInfo.id,
             addressId: addressId,
             postscript: postscript,
             freightPrice: freightPrice,
             actualPrice: actualPrice,
             offlinePay: 1
         }, 'POST').then(res => {
-            if (res.errno === 0) {
+            if (res.data.header.code === 0) {
                 wx.removeStorageSync('orderId');
                 wx.setStorageSync('addressId', 0);
                 wx.redirectTo({
                     url: '/pages/payOffline/index?status=1',
                 })
             } else {
-                util.showErrorToast(res.errmsg);
+                util.showErrorToast(res.data.header.msg);
                 wx.redirectTo({
                     url: '/pages/payOffline/index?status=0',
                 })

@@ -43,6 +43,7 @@ Page({
     mobilechange(e) {
         let mobile = e.detail.value;
         let address = this.data.address;
+
         if (util.testMobile(mobile)) {
             address.mobile = mobile;
             this.setData({
@@ -77,32 +78,40 @@ Page({
     },
     getAddressDetail() {
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         util.request(api.AddressDetail, {
-            id: that.data.addressId
-        }).then(function(res) {
-            if (res.errno === 0) {
-                that.setData({
-                    address: res.data
-                });
+            id: that.data.addressId,
+            userId: userInfo.id
+        },'POST').then(function(res) {
+            if (res.data.header.code === 0) {
+                if (JSON.stringify(res.data.body) != '{}') {
+                    that.setData({
+                        address: res.data.body.data
+                    });
+                }
+            } else {
+                util.showErrorToast(res.data.header.msg);
             }
         });
     },
     deleteAddress: function() {
         let id = this.data.addressId;
+        let userInfo = wx.getStorageSync('userInfo');
         wx.showModal({
             title: '提示',
             content: '您确定要删除么？',
             success: function(res) {
                 if (res.confirm) {
                     util.request(api.DeleteAddress, {
-                        id: id
+                        id: id,
+                        userId: userInfo.id
                     }, 'POST').then(function(res) {
-                        if (res.errno === 0) {
+                        if (res.data.header.code === 0) {
                             wx.removeStorageSync('addressId');
                             util.showErrorToast('删除成功');
                             wx.navigateBack();
                         } else {
-                            util.showErrorToast(res.errmsg);
+                            util.showErrorToast(res.data.header.msg);
                         }
                     });
                 }
@@ -281,10 +290,12 @@ Page({
             return item.name;
         }).join('');
 
+
         this.setData({
             address: address,
             openSelectRegion: false
         });
+
 
     },
     cancelSelectRegion() {
@@ -299,9 +310,9 @@ Page({
         util.request(api.RegionList, {
             parentId: regionId
         }).then(function(res) {
-            if (res.errno === 0) {
+            if (res.data.header.code === 0) {
                 that.setData({
-                    regionList: res.data.map(item => {
+                    regionList: res.data.body.data.map(item => {
 
                         //标记已选择的
                         if (regionType == item.type && that.data.selectRegionList[regionType - 1].id == item.id) {
@@ -335,6 +346,7 @@ Page({
             return false;
         }
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         util.request(api.SaveAddress, {
             id: address.id,
             name: address.name,
@@ -344,9 +356,12 @@ Page({
             district_id: address.district_id,
             address: address.address,
             is_default: address.is_default,
+            userId: userInfo.id,
         }, 'POST').then(function(res) {
-            if (res.errno === 0) {
+            if (res.data.header.code === 0) {
                 wx.navigateBack()
+            } else {
+                util.showErrorToast(res.data.header.msg);
             }
         });
     },

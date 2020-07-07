@@ -23,8 +23,8 @@ Page({
     getChannelShowInfo: function (e) {
         let that = this;
         util.request(api.ShowSettings).then(function (res) {
-            if (res.errno === 0) {
-                let index_banner_img = res.data.index_banner_img;
+            if (res.data.header.code === 0) {
+                let index_banner_img = res.data.body.data.index_banner_img;
                 that.setData({
                     index_banner_img: index_banner_img
                 });
@@ -40,14 +40,14 @@ Page({
     getCatalog: function() {
         //CatalogList
         let that = this;
-        util.request(api.CatalogList).then(function(res) {
+        util.request(api.CatalogList, {}, 'POST').then(function(res) {
             that.setData({
-                navList: res.data.categoryList,
+                navList: res.data.body.categoryList,
             });
         });
         util.request(api.GoodsCount).then(function(res) {
             that.setData({
-                goodsCount: res.data.goodsCount
+                goodsCount: res.data.body.goodsCount
             });
         });
     },
@@ -55,9 +55,9 @@ Page({
         let that = this;
         util.request(api.CatalogCurrent, {
             id: id
-        }).then(function(res) {
+        }, 'POST').then(function(res) {
             that.setData({
-                currentCategory: res.data
+                currentCategory: res.data.body.data
             });
         });
     },
@@ -68,12 +68,12 @@ Page({
             page: that.data.allPage,
             id: id
         }, 'POST').then(function(res) {
-            if (res.errno === 0) {
-                let count = res.data.count;
+            if (res.data.header.code === 0) {
+                let count = res.data.body.data.count;
                 that.setData({
                     allCount: count,
-                    allPage: res.data.currentPage,
-                    list: that.data.list.concat(res.data.data),
+                    allPage: res.data.body.data.currentPage,
+                    list: that.data.list.concat(res.data.body.data.data),
                     showNoMore: 1,
                     loading: 0,
                 });

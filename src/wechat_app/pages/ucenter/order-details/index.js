@@ -129,38 +129,42 @@ Page({
         util.request(api.OrderExpressInfo, {
             orderId: that.data.orderId
         }).then(function (res) {
-            if (res.errno === 0) {
-                let express = res.data;
-                express.traces = JSON.parse(res.data.traces);
+            if (res.data.header.code === 0) {
+                let express = res.data.body.data;
+                express.traces = JSON.parse(res.data.body.data.traces);
                 that.setData({
                     onPosting: 1,
                     express: express
                 });
+            } else {
+                util.showErrorToast(res.data.header.msg);
             }
         });
     },
     getOrderDetail: function () {
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         util.request(api.OrderDetail, {
-            orderId: that.data.orderId
-        }).then(function (res) {
-            if (res.errno === 0) {
+            orderId: that.data.orderId,
+            userId: userInfo.id,
+        },'POST').then(function (res) {
+            if (res.data.header.code === 0) {
                 that.setData({
-                    orderInfo: res.data.orderInfo,
-                    orderGoods: res.data.orderGoods,
-                    handleOption: res.data.handleOption,
-                    textCode: res.data.textCode,
-                    goodsCount: res.data.goodsCount
+                    orderInfo: res.data.body.data.orderInfo,
+                    orderGoods: res.data.body.data.orderGoods,
+                    handleOption: res.data.body.data.handleOption,
+                    textCode: res.data.body.data.textCode,
+                    goodsCount: res.data.body.data.goodsCount
                 });
-                let receive = res.data.textCode.receive;
+                let receive = res.data.body.data.textCode.receive;
                 if (receive == true) {
-                    let confirm_remainTime = res.data.orderInfo.confirm_remainTime;
+                    let confirm_remainTime = res.data.body.data.orderInfo.confirm_remainTime;
                     remaintimer.reTime(confirm_remainTime, 'c_remainTime', that);
                 }
-                let oCancel = res.data.handleOption.cancel;
+                let oCancel = res.data.body.data.handleOption.cancel;
                 let payTime = 0;
                 if (oCancel == true) {
-                    payTime = res.data.orderInfo.final_pay_time
+                    payTime = res.data.body.data.orderInfo.final_pay_time
                     that.orderTimer(payTime);
                 }
             }
@@ -169,28 +173,32 @@ Page({
     },
     letOrderCancel: function () {
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         util.request(api.OrderCancel, {
-            orderId: that.data.orderId
+            orderId: that.data.orderId,
+            userId: userInfo.id,
         }, 'POST').then(function (res) {
-            if (res.errno === 0) {
+            if (res.data.header.code === 0) {
                 that.getOrderDetail();
             } else {
-                util.showErrorToast(res.errmsg);
+                util.showErrorToast(res.data.header.msg);
             }
         });
     },
     // “删除”点击效果
     deleteOrder: function () {
         let that = this;
+        let userInfo = wx.getStorageSync('userInfo');
         wx.showModal({
             title: '',
             content: '确定要删除此订单？',
             success: function (res) {
                 if (res.confirm) {
                     util.request(api.OrderDelete, {
-                        orderId: that.data.orderId
+                        orderId: that.data.orderId,
+                        userId: userInfo.id
                     }, 'POST').then(function (res) {
-                        if (res.errno === 0) {
+                        if (res.data.header.code === 0) {
                             wx.showToast({
                                 title: '删除订单成功'
                             });
@@ -198,7 +206,7 @@ Page({
                             wx.setStorageSync('doRefresh', 1);
                             wx.navigateBack();
                         } else {
-                            util.showErrorToast(res.errmsg);
+                            util.showErrorToast(res.data.header.msg);
                         }
                     });
                 }
@@ -216,14 +224,14 @@ Page({
                     util.request(api.OrderConfirm, {
                         orderId: that.data.orderId
                     }, 'POST').then(function (res) {
-                        if (res.errno === 0) {
+                        if (res.data.header.code === 0) {
                             wx.showToast({
                                 title: '确认收货成功！'
                             });
                             wx.setStorageSync('doRefresh', 1);
                             that.getOrderDetail();
                         } else {
-                            util.showErrorToast(res.errmsg);
+                            util.showErrorToast(res.data.header.msg);
                         }
                     });
                 }
