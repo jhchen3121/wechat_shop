@@ -29,7 +29,7 @@ def get_order_status_text(session, order_id):
         '401': '交易成功',
     }
 
-    return status_mapping.get(str(order.order_status))
+    return status_mapping.get(str(order['order_status']))
 
 def get_order_handle_option(session, order_id):
     handle_option = { 
