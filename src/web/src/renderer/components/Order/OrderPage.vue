@@ -615,6 +615,7 @@
 
     import VueBarcode from '../../../../node_modules/vue-barcode';
     import ElButton from "../../../../node_modules/element-ui/packages/button/src/button.vue";
+    import api from '@/config/api';
     // Vue.component(VueBarcode.name, VueBarcode);
 
     export default {
@@ -688,8 +689,8 @@
             },
             getAllRegion() {
                 let that = this;
-                this.axios.get('order/getAllRegion').then((response) => {
-                    this.options = response.data.data;
+                this.axios.post(this.root + 'order/get_all_region').then((response) => {
+                    this.options = response.data.body.data;
                 })
             },
             deliveryGoGo() {
@@ -705,7 +706,7 @@
                         return false;
                     }
                 }
-                this.axios.get('order/orderDelivery', {
+                this.axios.post(this.root + 'order/order_delivery', {
                     params: {
                         orderId: this.order_id,
                         shipper: this.nowDeliveryId,
@@ -719,17 +720,17 @@
                 });
             },
             getDeliveyInfo() {
-                this.axios.get('delivery').then((response) => {
-                    this.deliveryCom = response.data.data;
+                this.axios.post(this.root + 'order/delivery').then((response) => {
+                    this.deliveryCom = response.data.body.data;
                 })
             },
             changeExpressValue(info) {
                 if (this.expressType == 1) {
-                    this.axios.post('order/saveExpressValueInfo', {
+                    this.axios.post(this.root + 'order/save_express_value_info', {
                         express_value: info.express_value,
                         id: info.id
                     }).then((response) => {
-                        if (response.data.errno === 0) {
+                        if (response.data.header.code === 0) {
                             this.$message({
                                 type: 'success',
                                 message: '保存成功!'
@@ -744,7 +745,7 @@
                 }
             },
             confirm() {
-                this.axios.get('order/orderpack', {
+                this.axios.post(this.root + 'order/orderpack', {
                     params: {
                         orderId: this.order_id,
                     }
@@ -754,11 +755,11 @@
                 })
             },
             changeRemarkInfo(info) {
-                this.axios.post('order/saveRemarkInfo', {
+                this.axios.post(this.root + 'order/save_remark_info', {
                     remark: info.remark,
                     id: info.id
                 }).then((response) => {
-                    if (response.data.errno === 0) {
+                    if (response.data.header.code === 0) {
                         this.$message({
                             type: 'success',
                             message: '保存成功!'
@@ -774,11 +775,11 @@
             changeInfo(info) {
                 let id = info.id;
                 let print_info = info.print_info;
-                this.axios.post('order/savePrintInfo', {
+                this.axios.post(this.root + 'order/save_print_info', {
                     print_info: print_info,
                     id: id
                 }).then((response) => {
-                    if (response.data.errno === 0) {
+                    if (response.data.header.code === 0) {
                         this.$message({
                             type: 'success',
                             message: '保存成功!'
@@ -792,11 +793,11 @@
                 })
             },
             changeMemo(id, text) {
-                this.axios.post('order/saveAdminMemo', {
+                this.axios.post(this.root + 'order/save_admin_memo', {
                     text: text,
                     id: id
                 }).then((response) => {
-                    if (response.data.errno === 0) {
+                    if (response.data.header.code === 0) {
                         this.$message({
                             type: 'success',
                             message: '保存成功!'
@@ -871,9 +872,8 @@
                     type: 'warning'
                 }).then(() => {
 
-                    this.axios.post('order/destory', {id: row.id}).then((response) => {
-                        console.log(response.data)
-                        if (response.data.errno === 0) {
+                    this.axios.post(this.root + 'order/destory', {id: row.id}).then((response) => {
+                        if (response.data.header.code === 0) {
                             this.$message({
                                 type: 'success',
                                 message: '删除成功!'
@@ -888,7 +888,7 @@
                 this.getList()
             },
             getList() {
-                this.axios.get('order', {
+                this.axios.post(this.root + 'order/index', {
                     params: {
                         page: this.page,
                         orderSn: this.filterForm.order_sn,
@@ -897,10 +897,10 @@
                         status: this.order_status,
                     }
                 }).then((response) => {
-                    this.tableData = response.data.data.data;
+                    this.tableData = response.data.body.data.data;
                     console.log(this.tableData);
-                    this.page = response.data.data.currentPage;
-                    this.total = response.data.data.count;
+                    this.page = response.data.body.data.currentPage;
+                    this.total = response.data.body.data.count;
 
                 })
             },
@@ -926,12 +926,12 @@
             },
             rePrintExpress() {
                 this.rePrintStatus = 0;
-                this.axios.get('order/rePrintExpress', {
+                this.axios.post(this.root + 'order/re_print_express', {
                     params: {
                         orderId: this.order_id,
                     }
                 }).then((response) => {
-                    if (response.data.errno === 0) {
+                    if (response.data.header.code === 0) {
                         this.expressType = 0;
                         this.getOrderInfo(this.order_id);
                         this.dialogFormVisible = true;
@@ -940,13 +940,13 @@
             },
             directPrintExpress() {
                 this.rePrintStatus = 1;
-                this.axios.get('order/directPrintExpress', {
+                this.axios.post(this.root + 'order/direct_print_express', {
                     params: {
                         orderId: this.order_id,
                     }
                 }).then((response) => {
-                    if (response.data.errno === 0) {
-                        let express = response.data.data;
+                    if (response.data.header.code === 0) {
+                        let express = response.data.body.data;
                         this.expressType = express.express_type;
                         let orderInfo = this.orderInfo;
                         this.sfHasValue = {
@@ -980,13 +980,12 @@
             },
             checkExpressInfo() {
                 this.getOrderInfo(this.order_id);
-                this.axios.get('order/checkExpress', {
+                this.axios.post(this.root + 'order/check_express', {
                     params: {
                         orderId: this.order_id,
                     }
                 }).then((response) => {
-                    console.log(response.data);
-                    if (response.data.errno === 0) {
+                    if (response.data.header.code === 0) {
                         this.dialogExpressVisible = true;
                     }
                     else {
@@ -996,7 +995,7 @@
                 })
             },
             receiveConfirm() {
-                this.axios.get('order/orderReceive', {
+                this.axios.post(this.root + 'order/order_receive', {
                     params: {
                         orderId: this.order_id,
                     }
@@ -1021,13 +1020,13 @@
                 console.log(expressType);
                 this.sender.senderOptions = this.senderOptions;
                 this.receiver.receiveOptions = this.receiveOptions;
-                this.axios.post('order/getMianExpress', {
+                this.axios.post(this.root + 'order/get_main_express', {
                     orderId: this.orderInfo.id,
                     sender: this.sender,
                     receiver: this.receiver,
                     expressType: expressType
                 }).then((response) => {
-                    let expressInfo = response.data.data.latestExpressInfo;
+                    let expressInfo = response.data.body.data.latestExpressInfo;
                     if (expressInfo.ResultCode == 100) {
                         this.rawHtml = expressInfo.PrintTemplate;
                         this.sfHasValue = expressInfo.Order;
@@ -1044,7 +1043,7 @@
                         this.dialogFormVisible = false;
                         this.dialogExpressVisible = false;
                     }
-                    else if (response.data.data.latestExpressInfo.ResultCode == 105) {
+                    else if (expressInfo.ResultCode == 105) {
                         this.$message({
                             type: 'error',
                             message: '操作超时，请重试!'
@@ -1064,10 +1063,10 @@
                 // });
             },
             deliveryConfirm(id) {
-                this.axios.post('order/goDelivery', {
+                this.axios.post(this.root + 'order/go_delivery', {
                     order_id: id,
                 }).then((response) => {
-                    if (response.data.errno === 0) {
+                    if (response.data.header.code === 0) {
                         this.getList();
                         this.$message({
                             type: 'success',
@@ -1083,10 +1082,10 @@
                 });
             },
             printAndDeliveryConfirm() {
-                this.axios.post('order/goDelivery', {
+                this.axios.post(this.root + 'order/go_delivery', {
                     order_id: this.order_id,
                 }).then((response) => {
-                    if (response.data.errno === 0) {
+                    if (response.data.header.code === 0) {
                         this.getList();
                         this.printMiandan = false;
                         this.dialogFormVisible = false;
@@ -1110,10 +1109,10 @@
                 });
             },
             printOnlyConfirm() {
-                this.axios.post('order/goPrintOnly', {
+                this.axios.post(this.root + 'order/go_print_only', {
                     order_id: this.order_id,
                 }).then((response) => {
-                    if (response.data.errno === 0) {
+                    if (response.data.header.code === 0) {
                         this.getList();
                         this.printMiandan = false;
                         this.dialogFormVisible = false;
@@ -1182,7 +1181,7 @@
                     });
                     return false;
                 }
-                this.axios.get('order/orderPrice', {
+                this.axios.post(this.root + 'order/order_price', {
                     params: {
                         orderId: this.order_id,
                         actualPrice: this.orderInfo.actual_price,
@@ -1196,20 +1195,20 @@
 
             },
             getAutoStatus() {
-                this.axios.get('order/getAutoStatus').then((response) => {
-                    let ele = response.data.data;
+                this.axios.post(this.root + 'order/get_auto_status').then((response) => {
+                    let ele = response.data.body.data;
                     ele == 1 ? this.autoGoDelivery = true : this.autoGoDelivery = false
                 })
             },
             getOrderInfo(sn) {
-                this.axios.get('order/detail', {
+                this.axios.post(this.root + 'order/detail', {
                     params: {
                         orderId: this.order_id,
                     }
                 }).then((response) => {
-                    this.orderInfo = response.data.data.orderInfo;
-                    this.receiver = response.data.data.receiver;
-                    this.sender = response.data.data.sender;
+                    this.orderInfo = response.data.body.data.orderInfo;
+                    this.receiver = response.data.body.data.receiver;
+                    this.sender = response.data.body.data.sender;
                     console.log(this.sender);
                     this.receiveOptions = [];
                     this.receiveOptions.push(
@@ -1242,6 +1241,7 @@
         //     this.getList();
         // },
         mounted() {
+            this.root = api.rootUrl;
             this.getList();
             this.getAutoStatus();
             // this.getSenderInfo();

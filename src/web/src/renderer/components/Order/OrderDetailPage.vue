@@ -249,6 +249,7 @@
 
 <script>
     import ElButton from "../../../../node_modules/element-ui/packages/button/src/button.vue";
+    import api from '@/config/api';
 
     export default {
         data() {
@@ -315,7 +316,7 @@
                 this.statusVisible = true;
             },
             statusConfirm(){
-                this.axios.post('order/changeStatus', {status: this.statusValue,orderSn:this.infoForm.order_sn}).then((response) => {
+                this.axios.post(this.root + 'order/change_status', {status: this.statusValue,orderSn:this.infoForm.order_sn}).then((response) => {
 //                    console.log(response.data);
                     this.getInfo();
                     this.statusVisible = false;
@@ -326,17 +327,18 @@
                 if (pindex == 1) {
                     if (this.is_finish == 0) {
                         this.on_posting = 1;
-                        this.axios.post('order/getOrderExpress', {orderId: this.infoForm.id}).then((response) => {
-                            this.expressData = response.data.data;
+                        // 物流信息接口查询，TODO
+                        this.axios.post(this.root + 'order/get_order_express', {orderId: this.infoForm.id}).then((response) => {
+                            this.expressData = response.data.body.data;
                             this.expressData.traces = JSON.parse(this.expressData.traces);
-                            this.is_finish = response.data.data.is_finish;
+                            this.is_finish = response.data.body.data.is_finish;
                             this.on_posting = 0;
                         })
                     }
                 }
             },
             PackageConfirm() {
-                this.axios.get('order/orderpack', {
+                this.axios.post(this.root + 'order/orderpack', {
                     params: {
                         orderSn: this.infoForm.order_sn,
                     }
@@ -361,8 +363,8 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.axios.post('order/goodsListDelete', this.goodsData).then((response) => {
-                        if (response.data.errno === 0) {
+                    this.axios.post(this.root + 'order/goods_list_delete', this.goodsData).then((response) => {
+                        if (response.data.header.code === 0) {
                             this.$message({
                                 type: 'success',
                                 message: '删除成功!'
@@ -398,10 +400,9 @@
                     }
                     this.goodsData.number = number;
                     this.goodsData.addOrMinus = addOrMinus;
-                    this.axios.post('order/saveGoodsList', this.goodsData).then((response) => {
-//                        console.log(response.data);
+                    this.axios.post(this.root + 'order/save_goods_list', this.goodsData).then((response) => {
 //                        this.dialogGoodsListVisible = false;
-//                        this.infoForm.order_sn = response.data.data;
+//                        this.infoForm.order_sn = response.data.body.data;
 //
 //                        this.addressData = [];
 //                        this.getInfo();
@@ -415,14 +416,11 @@
             },
             saveAdminMemo() {
 
-                this.axios.post('order/saveAdminMemo', {
+                this.axios.post(this.root + 'order/save_admin_memo', {
                     text: this.infoForm.admin_memo,
                     id: this.infoForm.id
                 }).then((response) => {
-                    console.log('++---------------------------++');
-                    console.log(response);
-                    console.log('++---------------------------++');
-                    if (response.data.errno === 0) {
+                    if (response.data.header.code === 0) {
                         this.$message({
                             type: 'success',
                             message: '保存成功!'
@@ -438,11 +436,8 @@
             saveAddress() {
                 this.nowAddressData.order_sn = this.infoForm.order_sn;
                 this.nowAddressData.addOptions = this.addOptions;
-                this.axios.post('order/saveAddress', this.nowAddressData).then((response) => {
-                    console.log('++---------------------------++');
-                    console.log(response);
-                    console.log('++---------------------------++');
-                    if (response.data.errno === 0) {
+                this.axios.post(this.root + 'order/save_address', this.nowAddressData).then((response) => {
+                    if (response.data.header.code === 0) {
                         this.$message({
                             type: 'success',
                             message: '修改成功!'
@@ -477,23 +472,20 @@
             },
             getAllRegion() {
                 let that = this;
-                this.axios.get('order/getAllRegion').then((response) => {
-                    this.options = response.data.data;
+                this.axios.post(this.root + 'order/get_all_region').then((response) => {
+                    this.options = response.data.body.data;
                 })
             },
             getInfo() {
                 if (this.infoForm.id <= 0) {
                     return false
                 }
-                this.axios.get('order/detail', {
+                this.axios.post(this.root + 'order/detail', {
                     params: {
                         orderId: this.infoForm.id
                     }
                 }).then((response) => {
-                    console.log('++---------------------------++');
-                    console.log(response.data.data);
-                    console.log('++---------------------------++');
-                    this.infoForm = response.data.data.orderInfo;
+                    this.infoForm = response.data.body.data.orderInfo;
                     let data = {
                         user_id: this.infoForm.user_id,
                         name: this.infoForm.consignee,
@@ -520,6 +512,7 @@
         components: {ElButton},
         mounted() {
 //            console.log(this.$route.query);
+            this.root = api.rootUrl;
             this.infoForm.id = this.$route.query.id || 0;
             this.getInfo();
             this.getAllRegion();

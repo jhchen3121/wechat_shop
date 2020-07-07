@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import api from '@/config/api';
 
 export default {
 	data() {
@@ -77,15 +78,15 @@ export default {
 			this.getList()
 		},
 		getList() {
-			this.axios.get('shopcart', {
+			this.axios.post(this.root + 'shopcart/index', {
 				params: {
 					page: this.page,
 					name: this.filterForm.name
 				}
 			}).then((response) => {
-                this.tableData = response.data.data.data
-                this.page = response.data.data.currentPage
-                this.total = response.data.data.count
+                this.tableData = response.data.body.data.data
+                this.page = response.data.body.data.currentPage
+                this.total = response.data.body.data.count
 			})
 		}
 	},
@@ -93,6 +94,7 @@ export default {
 
 	},
 	mounted() {
+        this.root = api.rootUrl;
 		this.getList();
 	}
 }
