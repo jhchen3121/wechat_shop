@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import settings
-from domain.models import *
+from server.domain.models import *
 from core_backend.database import con, connect
+from sqlalchemy import create_engine
+from core_backend.database.base import DomainBase
 
 if __name__ == "__main__":
     print settings.DB_URL
-    connect(settings.DB_URL)
-    print settings.DB_URL
-    con.metadata.create_all()
+    engine = create_engine(settings.DB_URL)
+    DomainBase.metadata.create_all(engine)

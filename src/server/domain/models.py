@@ -431,5 +431,5 @@ class WechatshopUser(DomainBase):
     city = Column(String(100), server_default=text("'0'"))
 
 
-engine = create_engine(settings.DB_URL)
-DomainBase.metadata.create_all(engine)
+#engine = create_engine(settings.DB_URL)
+#DomainBase.metadata.create_all(engine)
