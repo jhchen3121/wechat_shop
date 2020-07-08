@@ -1,7 +1,7 @@
 {
-  "name": "hioshop-admin",
+  "name": "wechatshop-admin",
   "version": "0.0.0",
-  "author": "sligxl@163.com",
+  "author": "312142775@qq.com",
   "description": "An electron-vue project",
   "license": null,
   "main": "./dist/electron/main.js",
@@ -17,7 +17,7 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "hioshop-admin",
+    "productName": "wechatshop-admin",
     "appId": "org.simulatedgreg.electron-vue",
     "directories": {
       "output": "build"
