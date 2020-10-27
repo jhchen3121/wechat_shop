@@ -55,7 +55,7 @@ crate==0.20.1
 pydraco==0.2.2
 
 pynacl==1.2.1
-cryptography==2.3
+cryptography==3.2
 bcrypt==3.1.4
 pyasn1==0.4.4
 cffi==1.11.5
