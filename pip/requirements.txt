@@ -63,7 +63,7 @@ idna==2.7
 asn1crypto==0.24.0
 ipaddress==1.0.22
 pycparser==2.19
-paramiko==2.4.1
+paramiko==2.10.1
 python-crontab==2.2.8
 pycrypto==2.6.1
 schedule==0.5.0
