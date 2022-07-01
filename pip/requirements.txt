@@ -37,7 +37,7 @@ pylru==1.0.9
 urllib3==1.22
 XlsxWriter==0.9.8
 python-dateutil==2.6.1
-supervisor==3.3.2
+supervisor==3.3.3
 docxtpl==0.4.13
 python-docx==0.8.6
 text-unidecode==1.2
